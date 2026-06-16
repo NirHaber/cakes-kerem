@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if recipe %}
+<article class="recipe-page">
+    <img class="recipe-hero-image" src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
+
+    <div class="recipe-details">
+        <span class="category">{{ recipe.category }}</span>
+        <h2>{{ recipe.title }}</h2>
+        <p>{{ recipe.description }}</p>
+
+        <div class="score-box">
+            <h3>דירוג מתכון</h3>
+            <p>⭐ דירוג כללי: {{ recipe.rating }}</p>
+            <p>רמת קושי: {{ recipe.difficulty }}</p>
+            <p>עלות חומרים: {{ recipe.cost }}</p>
+            <p>זמן הכנה: {{ recipe.prep_time }}</p>
+        </div>
+
+        <a class="back-link" href="/">חזרה לדף הבית</a>
+    </div>
+</article>
+{% else %}
+<h2>המתכון לא נמצא</h2>
+<a class="back-link" href="/">חזרה לדף הבית</a>
+{% endif %}
+{% endblock %}

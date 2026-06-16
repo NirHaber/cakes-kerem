@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-text">
+        <span class="hero-badge">עוגות וקינוחים בלבד</span>
+        <h2>מה בא לך להכין היום?</h2>
+        <p>חפש מתכוני עוגות וקינוחים לפי שם, קטגוריה או תגיות.</p>
+
+        <form class="search-form" method="get" action="/">
+            <input type="text" name="q" value="{{ q }}" placeholder="לדוגמה: שוקולד, גבינה, ללא אפייה...">
+            <button type="submit">חפש</button>
+        </form>
+
+        <p class="search-count">נמצאו {{ total_recipes }} מתכונים</p>
+    </div>
+</section>
+
+<section class="recipes-grid">
+    {% for recipe in recipes %}
+    <a class="recipe-card" href="/recipe/{{ recipe.id }}">
+        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
+
+        <div class="recipe-content">
+            <span class="category">{{ recipe.category }}</span>
+            <h3>{{ recipe.title }}</h3>
+            <p>{{ recipe.description }}</p>
+
+            <div class="tags">
+                {% for tag in recipe.tags_list %}
+                <span>{{ tag }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="recipe-meta">
+                <span>⭐ {{ recipe.rating }}</span>
+                <span>קושי: {{ recipe.difficulty }}</span>
+                <span>עלות: {{ recipe.cost }}</span>
+                <span>{{ recipe.prep_time }}</span>
+
+                <form method="post" action="/delete/{{ recipe.id }}" onsubmit="return confirm('למחוק את המתכון?');">
+                    <button type="submit" class="delete-btn">
+                        מחק
+                    </button>
+                </form>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</section>
+
+{% if total_recipes == 0 %}
+<div class="empty-state">
+    <h3>לא נמצאו מתכונים</h3>
+    <p>נסה לחפש מילה אחרת כמו שוקולד, גבינה או ללא אפייה.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,126 @@
+from fastapi import FastAPI, Request, Query, Form
+from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+
+from database import engine, SessionLocal, Base
+from models import Recipe
+
+app = FastAPI(title="עוגות קרם")
+
+Base.metadata.create_all(bind=engine)
+
+templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        return db
+    finally:
+        pass
+
+
+@app.get("/")
+def home(request: Request, q: str = Query(default="")):
+    db = get_db()
+
+    query = db.query(Recipe)
+
+    if q:
+        search = f"%{q}%"
+        query = query.filter(
+            (Recipe.title.like(search)) |
+            (Recipe.category.like(search)) |
+            (Recipe.description.like(search)) |
+            (Recipe.tags.like(search))
+        )
+
+    recipes = query.order_by(Recipe.id.desc()).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={
+            "recipes": recipes,
+            "q": q,
+            "total_recipes": len(recipes),
+        },
+    )
+
+
+@app.get("/recipe/{recipe_id}")
+def recipe_page(request: Request, recipe_id: int):
+    db = get_db()
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="recipe.html",
+        context={"recipe": recipe},
+    )
+
+
+@app.get("/admin")
+def admin_page(request: Request):
+    db = get_db()
+    recipes = db.query(Recipe).order_by(Recipe.id.desc()).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin.html",
+        context={"recipes": recipes},
+    )
+
+
+@app.post("/admin/add")
+def add_recipe(
+    title: str = Form(...),
+    category: str = Form(...),
+    description: str = Form(...),
+    image_url: str = Form(...),
+    rating: float = Form(...),
+    difficulty: str = Form(...),
+    cost: str = Form(...),
+    prep_time: str = Form(...),
+    tags: str = Form(""),
+):
+    db = get_db()
+
+    recipe = Recipe(
+        title=title,
+        category=category,
+        description=description,
+        image_url=image_url,
+        rating=rating,
+        difficulty=difficulty,
+        cost=cost,
+        prep_time=prep_time,
+        tags=tags,
+    )
+
+    db.add(recipe)
+    db.commit()
+    db.close()
+
+    return RedirectResponse(url="/admin", status_code=303)
+
+@app.post("/delete/{recipe_id}")
+def delete_recipe(recipe_id: int):
+    db = get_db()
+
+    recipe = db.query(Recipe).filter(
+        Recipe.id == recipe_id
+    ).first()
+
+    if recipe:
+        db.delete(recipe)
+        db.commit()
+
+    db.close()
+
+    return RedirectResponse(
+        url="/",
+        status_code=303
+    )

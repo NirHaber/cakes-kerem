@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-text">
+        <span class="hero-badge">ניהול מתכונים</span>
+        <h2>הוספת מתכון חדש</h2>
+        <p>המתכון יישמר במסד הנתונים SQLite.</p>
+    </div>
+</section>
+
+<form class="admin-form" method="post" action="/admin/add">
+    <input name="title" placeholder="שם המתכון" required>
+    <input name="category" placeholder="קטגוריה" required>
+    <textarea name="description" placeholder="תיאור קצר" required></textarea>
+    <input name="image_url" placeholder="קישור לתמונה" required>
+    <input name="rating" type="number" step="0.1" min="1" max="5" placeholder="דירוג 1-5" required>
+    <input name="difficulty" placeholder="רמת קושי" required>
+    <input name="cost" placeholder="עלות" required>
+    <input name="prep_time" placeholder="זמן הכנה" required>
+    <input name="tags" placeholder="תגיות מופרדות בפסיקים">
+
+    <button type="submit">שמור מתכון</button>
+</form>
+
+<h2 class="admin-title">מתכונים קיימים</h2>
+
+<section class="recipes-grid">
+    {% for recipe in recipes %}
+    <a class="recipe-card" href="/recipe/{{ recipe.id }}">
+        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
+        <div class="recipe-content">
+            <span class="category">{{ recipe.category }}</span>
+            <h3>{{ recipe.title }}</h3>
+            <p>{{ recipe.description }}</p>
+            <div class="recipe-meta">
+                <span>⭐ {{ recipe.rating }}</span>
+                <span>קושי: {{ recipe.difficulty }}</span>
+                <span>עלות: {{ recipe.cost }}</span>
+                <span>{{ recipe.prep_time }}</span>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</section>
+{% endblock %}
