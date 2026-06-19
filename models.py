@@ -14,6 +14,8 @@ class Recipe(Base):
     title = Column(String(200))
     category = Column(String(100))
     description = Column(Text)
+    ingredients = Column(Text)
+    instructions = Column(Text)    
     image_url = Column(Text)
     rating = Column(Float)
     difficulty = Column(String(50))
