@@ -29,20 +29,39 @@
 
 <section class="recipes-grid">
     {% for recipe in recipes %}
-    <a class="recipe-card" href="/recipe/{{ recipe.id }}">
-        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
-        <div class="recipe-content">
-            <span class="category">{{ recipe.category }}</span>
-            <h3>{{ recipe.title }}</h3>
-            <p>{{ recipe.description }}</p>
-            <div class="recipe-meta">
-                <span>⭐ {{ recipe.rating }}</span>
-                <span>קושי: {{ recipe.difficulty }}</span>
-                <span>עלות: {{ recipe.cost }}</span>
-                <span>{{ recipe.prep_time }}</span>
+
+    <div>
+        <a class="recipe-card" href="/recipe/{{ recipe.id }}">
+            <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
+            <div class="recipe-content">
+                <span class="category">{{ recipe.category }}</span>
+                <h3>{{ recipe.title }}</h3>
+                <p>{{ recipe.description }}</p>
+
+                <div class="recipe-meta">
+                    <span>⭐ {{ recipe.rating }}</span>
+                    <span>קושי: {{ recipe.difficulty }}</span>
+                    <span>עלות: {{ recipe.cost }}</span>
+                    <span>{{ recipe.prep_time }}</span>
+                </div>
             </div>
+        </a>
+
+        <div style="margin-top: 10px; margin-bottom: 20px;">
+            <a href="/edit/{{ recipe.id }}">
+                <button type="button">ערוך</button>
+            </a>
+
+            <form
+                method="post"
+                action="/delete/{{ recipe.id }}"
+                style="display: inline;"
+            >
+                <button type="submit">מחק</button>
+            </form>
         </div>
-    </a>
+    </div>
+
     {% endfor %}
 </section>
 {% endblock %}

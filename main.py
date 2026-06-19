@@ -128,3 +128,65 @@ def delete_recipe(recipe_id: int):
         url="/",
         status_code=303
     )
+
+@app.get("/edit/{recipe_id}")
+def edit_recipe_page(request: Request, recipe_id: int):
+    db = get_db()
+
+    recipe = db.query(Recipe).filter(
+        Recipe.id == recipe_id
+    ).first()
+
+    db.close()
+
+    if not recipe:
+        return RedirectResponse(url="/admin", status_code=303)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="edit.html",
+        context={"recipe": recipe},
+    )
+
+@app.post("/edit/{recipe_id}")
+def edit_recipe(
+    recipe_id: int,
+    title: str = Form(...),
+    category: str = Form(...),
+    description: str = Form(...),
+    image_url: str = Form(...),
+    ingredients: str = Form(...),
+    instructions: str = Form(...),
+    rating: float = Form(...),
+    difficulty: str = Form(...),
+    cost: str = Form(...),
+    prep_time: str = Form(...),
+    tags: str = Form(""),
+):
+    db = get_db()
+
+    recipe = db.query(Recipe).filter(
+        Recipe.id == recipe_id
+    ).first()
+
+    if recipe:
+        recipe.title = title
+        recipe.category = category
+        recipe.description = description
+        recipe.image_url = image_url
+        recipe.ingredients = ingredients
+        recipe.instructions = instructions
+        recipe.rating = rating
+        recipe.difficulty = difficulty
+        recipe.cost = cost
+        recipe.prep_time = prep_time
+        recipe.tags = tags
+
+        db.commit()
+
+    db.close()
+
+    return RedirectResponse(
+        url="/admin",
+        status_code=303
+    )
