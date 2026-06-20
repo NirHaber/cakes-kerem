@@ -3,7 +3,14 @@
 {% block content %}
 {% if recipe %}
 <article class="recipe-page">
+
+    {% if recipe.image_url %}
     <img class="recipe-hero-image" src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
+    {% else %}
+    <img class="recipe-hero-image"
+        src="https://images.unsplash.com/photo-1551024506-0bccd828d307"
+        alt="{{ recipe.title }}">
+    {% endif %}
 
     <div class="recipe-details">
         <span class="category">{{ recipe.category }}</span>

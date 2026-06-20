@@ -27,6 +27,12 @@
 <section class="recipes-grid">
     {% for recipe in ai_recipes %}
     <div class="recipe-card">
+        {% if recipe.image_url %}
+        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
+        {% else %}
+        <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307" alt="{{ recipe.title }}">
+        {% endif %}
+
         <div class="recipe-content">
             <span class="category">{{ recipe.category }}</span>
             <h3>{{ recipe.title }}</h3>
