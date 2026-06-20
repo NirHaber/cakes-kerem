@@ -5,27 +5,71 @@
     <div class="hero-text">
         <span class="hero-badge">חיפוש AI</span>
         <h2>חיפוש מתכונים חכם</h2>
-        <p>כתוב מה יש לך בבית, ו־Gemini יציע מתכונים מתוך המאגר הקיים.</p>
+        <p>כתוב מה יש לך בבית, ו־Gemini יציע מתכונים חדשים לפי המבנה של האתר.</p>
 
         <form class="admin-form" method="post" action="/ai-search">
             <textarea
                 name="user_request"
                 placeholder="לדוגמה: יש לי שוקולד, שמנת וביסקוויטים"
                 required
-            ></textarea>
+            >{{ user_request or "" }}</textarea>
 
             <button type="submit">
                 חפש עם AI
             </button>
         </form>
-
-        {% if ai_answer %}
-        <div class="score-box">
-            <h3>המלצת AI</h3>
-            <p style="white-space: pre-line;">{{ ai_answer }}</p>
-        </div>
-        {% endif %}
-
     </div>
 </section>
+
+{% if ai_recipes %}
+<h2 class="admin-title">מתכונים שהוצעו על ידי Gemini</h2>
+
+<section class="recipes-grid">
+    {% for recipe in ai_recipes %}
+    <div class="recipe-card">
+        <div class="recipe-content">
+            <span class="category">{{ recipe.category }}</span>
+            <h3>{{ recipe.title }}</h3>
+            <p>{{ recipe.description }}</p>
+
+            <div class="tags">
+                {% for tag in recipe.tags.split(",") %}
+                <span>{{ tag.strip() }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="recipe-meta">
+                <span>⭐ {{ recipe.rating }}</span>
+                <span>קושי: {{ recipe.difficulty }}</span>
+                <span>עלות: {{ recipe.cost }}</span>
+                <span>{{ recipe.prep_time }}</span>
+            </div>
+
+            <div class="recipe-section ai-scroll-box">
+                <h3>מרכיבים</h3>
+                <p style="white-space: pre-line;">{{ recipe.ingredients }}</p>
+            </div>
+
+            <div class="recipe-section ai-scroll-box">
+                <h3>הוראות הכנה</h3>
+                <p style="white-space: pre-line;">{{ recipe.instructions }}</p>
+            </div>
+
+            <button type="button" class="ai-save-btn">
+                שמור למאגר
+            </button>
+            
+        </div>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+{% if ai_answer and not ai_recipes %}
+<div class="score-box">
+    <h3>תשובת AI גולמית</h3>
+    <p style="white-space: pre-line;">{{ ai_answer }}</p>
+</div>
+{% endif %}
+
 {% endblock %}

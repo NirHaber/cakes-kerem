@@ -7,9 +7,12 @@ from database import engine, SessionLocal, Base
 from models import Recipe
 from sqlalchemy import or_
 
+import json
 import os
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
+from google.genai import errors
 
 app = FastAPI(title="עוגות קרם")
 
@@ -121,57 +124,66 @@ def ai_search_page(request: Request):
 
 @app.post("/ai-search")
 def ai_search(request: Request, user_request: str = Form(...)):
-    db = get_db()
-
-    recipes = db.query(Recipe).order_by(Recipe.id.desc()).all()
-    db.close()
-
-    recipes_text = ""
-
-    for recipe in recipes:
-        recipes_text += f"""
-ID: {recipe.id}
-שם: {recipe.title}
-קטגוריה: {recipe.category}
-תיאור: {recipe.description}
-תגיות: {recipe.tags}
-מרכיבים: {recipe.ingredients}
----
-"""
-
     prompt = f"""
-אתה עוזר חכם למציאת מתכוני עוגות וקינוחים.
+אתה עוזר מומחה לעוגות וקינוחים.
 
 המשתמש כתב:
 {user_request}
 
-להלן מאגר המתכונים הקיים באתר:
-{recipes_text}
+הצע 3 מתכונים חדשים שמתאימים לבקשה.
 
-המשימה שלך:
-בחר עד 3 מתכונים הכי מתאימים מתוך המאגר בלבד.
+החזר JSON בלבד, בלי הסברים ובלי Markdown.
+
+המבנה המדויק:
+
+[
+  {{
+    "title": "שם המתכון",
+    "category": "קטגוריה",
+    "description": "תיאור קצר",
+    "image_url": "קישור לתמונה מתאימה או מחרוזת ריקה אם אין",
+    "ingredients": "מרכיב 1\\nמרכיב 2\\nמרכיב 3",
+    "instructions": "שלב 1\\nשלב 2\\nשלב 3",
+    "rating": 4.5,
+    "difficulty": "קל",
+    "cost": "בינוני",
+    "prep_time": "30 דקות",
+    "tags": "שוקולד, ללא אפייה, קינוח"
+  }}
+]
 
 חשוב:
-- אל תמציא מתכונים חדשים.
-- השתמש רק במתכונים שמופיעים במאגר.
 - כתוב בעברית.
-- עבור כל המלצה כתוב:
-  1. שם המתכון
-  2. למה הוא מתאים
-  3. אילו מרכיבים מהבקשה נמצאו בו
+- עוגות וקינוחים בלבד.
+- החזר רק JSON תקין.
+- אל תוסיף טקסט לפני או אחרי ה-JSON.
+- אם אינך בטוח לגבי קישור תמונה אמיתי, החזר image_url ריק.
 """
 
-    response = gemini_client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-    )
+    try:
+        response = gemini_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+        )
+
+        ai_answer = response.text.strip()
+
+        try:
+            ai_recipes = json.loads(ai_answer)
+        except json.JSONDecodeError:
+            ai_recipes = []
+
+    except errors.ClientError as e:
+        ai_answer = "חרגת זמנית ממכסת השימוש של Gemini. נסה שוב בעוד דקה."
+        ai_recipes = []
 
     return templates.TemplateResponse(
         request=request,
         name="ai_search.html",
         context={
             "user_request": user_request,
-            "ai_answer": response.text,
+            "ai_answer": ai_answer,
+            "ai_recipes": ai_recipes,
         },
     )
 
