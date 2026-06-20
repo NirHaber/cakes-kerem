@@ -7,6 +7,10 @@ from database import engine, SessionLocal, Base
 from models import Recipe
 from sqlalchemy import or_
 
+import os
+from dotenv import load_dotenv
+from google import genai
+
 app = FastAPI(title="עוגות קרם")
 
 Base.metadata.create_all(bind=engine)
@@ -14,6 +18,11 @@ Base.metadata.create_all(bind=engine)
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+load_dotenv()
+
+gemini_client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
+)
 
 def get_db():
     db = SessionLocal()
@@ -102,6 +111,69 @@ def admin_page(request: Request):
         context={"recipes": recipes},
     )
 
+@app.get("/ai-search")
+def ai_search_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="ai_search.html",
+        context={},
+    )
+
+@app.post("/ai-search")
+def ai_search(request: Request, user_request: str = Form(...)):
+    db = get_db()
+
+    recipes = db.query(Recipe).order_by(Recipe.id.desc()).all()
+    db.close()
+
+    recipes_text = ""
+
+    for recipe in recipes:
+        recipes_text += f"""
+ID: {recipe.id}
+שם: {recipe.title}
+קטגוריה: {recipe.category}
+תיאור: {recipe.description}
+תגיות: {recipe.tags}
+מרכיבים: {recipe.ingredients}
+---
+"""
+
+    prompt = f"""
+אתה עוזר חכם למציאת מתכוני עוגות וקינוחים.
+
+המשתמש כתב:
+{user_request}
+
+להלן מאגר המתכונים הקיים באתר:
+{recipes_text}
+
+המשימה שלך:
+בחר עד 3 מתכונים הכי מתאימים מתוך המאגר בלבד.
+
+חשוב:
+- אל תמציא מתכונים חדשים.
+- השתמש רק במתכונים שמופיעים במאגר.
+- כתוב בעברית.
+- עבור כל המלצה כתוב:
+  1. שם המתכון
+  2. למה הוא מתאים
+  3. אילו מרכיבים מהבקשה נמצאו בו
+"""
+
+    response = gemini_client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="ai_search.html",
+        context={
+            "user_request": user_request,
+            "ai_answer": response.text,
+        },
+    )
 
 @app.post("/admin/add")
 def add_recipe(

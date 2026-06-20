@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-text">
+        <span class="hero-badge">חיפוש AI</span>
+        <h2>חיפוש מתכונים חכם</h2>
+        <p>כתוב מה יש לך בבית, ו־Gemini יציע מתכונים מתוך המאגר הקיים.</p>
+
+        <form class="admin-form" method="post" action="/ai-search">
+            <textarea
+                name="user_request"
+                placeholder="לדוגמה: יש לי שוקולד, שמנת וביסקוויטים"
+                required
+            ></textarea>
+
+            <button type="submit">
+                חפש עם AI
+            </button>
+        </form>
+
+        {% if ai_answer %}
+        <div class="score-box">
+            <h3>המלצת AI</h3>
+            <p style="white-space: pre-line;">{{ ai_answer }}</p>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}
