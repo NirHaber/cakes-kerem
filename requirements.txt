@@ -3,3 +3,5 @@ uvicorn
 jinja2
 python-multipart
 sqlalchemy
+python-dotenv
+google-genai
