@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 
 from database import engine, SessionLocal, Base
 from models import Recipe
+from sqlalchemy import or_
 
 app = FastAPI(title="עוגות קרם")
 
@@ -23,7 +24,11 @@ def get_db():
 
 
 @app.get("/")
-def home(request: Request, q: str = Query(default="")):
+def home(
+    request: Request,
+    q: str = Query(default=""),
+    mode: str = Query(default="and"),
+):
     db = get_db()
 
     query = db.query(Recipe)
@@ -31,18 +36,36 @@ def home(request: Request, q: str = Query(default="")):
     if q:
         search_words = q.split()
 
-        for word in search_words:
-            search = f"%{word}%"
+        if mode == "or":
+            filters = []
 
-            query = query.filter(
-                (Recipe.title.like(search))
-                | (Recipe.category.like(search))
-                | (Recipe.description.like(search))
-                | (Recipe.tags.like(search))
-                | (Recipe.ingredients.like(search))
-                | (Recipe.instructions.like(search))
-            )
-            
+            for word in search_words:
+                search = f"%{word}%"
+
+                filters.append(
+                    (Recipe.title.like(search))
+                    | (Recipe.category.like(search))
+                    | (Recipe.description.like(search))
+                    | (Recipe.tags.like(search))
+                    | (Recipe.ingredients.like(search))
+                    | (Recipe.instructions.like(search))
+                )
+
+            query = query.filter(or_(*filters))
+
+        else:
+            for word in search_words:
+                search = f"%{word}%"
+
+                query = query.filter(
+                    (Recipe.title.like(search))
+                    | (Recipe.category.like(search))
+                    | (Recipe.description.like(search))
+                    | (Recipe.tags.like(search))
+                    | (Recipe.ingredients.like(search))
+                    | (Recipe.instructions.like(search))
+                )
+
     recipes = query.order_by(Recipe.id.desc()).all()
 
     return templates.TemplateResponse(
@@ -51,10 +74,10 @@ def home(request: Request, q: str = Query(default="")):
         context={
             "recipes": recipes,
             "q": q,
+            "mode": mode,
             "total_recipes": len(recipes),
         },
     )
-
 
 @app.get("/recipe/{recipe_id}")
 def recipe_page(request: Request, recipe_id: int):

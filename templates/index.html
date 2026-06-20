@@ -8,10 +8,34 @@
         <p>חפש מתכוני עוגות וקינוחים לפי שם, קטגוריה או תגיות.</p>
 
         <form class="search-form" method="get" action="/">
-            <input type="text" name="q" value="{{ q }}" placeholder="לדוגמה: שוקולד, גבינה, ללא אפייה...">
-            <button type="submit">חפש</button>
+            <input
+                type="text"
+                name="q"
+                value="{{ q }}"
+                placeholder="לדוגמה: שוקולד, גבינה, ללא אפייה..."
+            >
+        
+            <select name="mode">
+                <option value="and" {% if mode == "and" %}selected{% endif %}>
+                    כל המילים (AND)
+                </option>
+        
+                <option value="or" {% if mode == "or" %}selected{% endif %}>
+                    לפחות מילה אחת (OR)
+                </option>
+            </select>
+        
+            <button type="submit">
+                חפש
+            </button>
+        
+            <a href="/">
+                <button type="button">
+                    נקה
+                </button>
+            </a>
         </form>
-
+                
         <p class="search-count">נמצאו {{ total_recipes }} מתכונים</p>
     </div>
 </section>
