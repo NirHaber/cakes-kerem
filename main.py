@@ -215,6 +215,8 @@ def add_recipe(
         cost=cost,
         prep_time=prep_time,
         tags=tags,
+        source="manual",
+        source_url="",
     )
 
     db.add(recipe)
@@ -291,6 +293,45 @@ def edit_recipe(
 
         db.commit()
 
+    db.close()
+
+    return RedirectResponse(url="/admin", status_code=303)
+
+@app.post("/ai-save")
+def ai_save_recipe(
+    title: str = Form(...),
+    category: str = Form(...),
+    description: str = Form(...),
+    image_url: str = Form(""),
+    ingredients: str = Form(...),
+    instructions: str = Form(...),
+    rating: float = Form(...),
+    difficulty: str = Form(...),
+    cost: str = Form(...),
+    prep_time: str = Form(...),
+    tags: str = Form(""),
+    source_url: str = Form(""),
+):
+    db = get_db()
+
+    recipe = Recipe(
+        title=title,
+        category=category,
+        description=description,
+        image_url=image_url,
+        ingredients=ingredients,
+        instructions=instructions,
+        rating=rating,
+        difficulty=difficulty,
+        cost=cost,
+        prep_time=prep_time,
+        tags=tags,
+        source="gemini",
+        source_url=source_url,
+    )
+
+    db.add(recipe)
+    db.commit()
     db.close()
 
     return RedirectResponse(url="/admin", status_code=303)

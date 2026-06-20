@@ -15,14 +15,16 @@ class Recipe(Base):
     category = Column(String(100))
     description = Column(Text)
     ingredients = Column(Text)
-    instructions = Column(Text)    
+    instructions = Column(Text)
     image_url = Column(Text)
     rating = Column(Float)
     difficulty = Column(String(50))
     cost = Column(String(50))
     prep_time = Column(String(100))
     tags = Column(Text)
-    
+    source = Column(String, default="manual")
+    source_url = Column(String, default="")
+
     @property
     def tags_list(self):
         if not self.tags:

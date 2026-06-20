@@ -55,10 +55,24 @@
                 <p style="white-space: pre-line;">{{ recipe.instructions }}</p>
             </div>
 
-            <button type="button" class="ai-save-btn">
-                שמור למאגר
-            </button>
+            <form method="post" action="/ai-save">
+                <input type="hidden" name="title" value="{{ recipe.title }}">
+                <input type="hidden" name="category" value="{{ recipe.category }}">
+                <input type="hidden" name="description" value="{{ recipe.description }}">
+                <input type="hidden" name="image_url" value="{{ recipe.image_url or '' }}">
+                <input type="hidden" name="ingredients" value="{{ recipe.ingredients }}">
+                <input type="hidden" name="instructions" value="{{ recipe.instructions }}">
+                <input type="hidden" name="rating" value="{{ recipe.rating }}">
+                <input type="hidden" name="difficulty" value="{{ recipe.difficulty }}">
+                <input type="hidden" name="cost" value="{{ recipe.cost }}">
+                <input type="hidden" name="prep_time" value="{{ recipe.prep_time }}">
+                <input type="hidden" name="tags" value="{{ recipe.tags }}">
+                <input type="hidden" name="source_url" value="">
             
+                <button type="submit" class="ai-save-btn">
+                    שמור למאגר
+                </button>
+            </form>            
         </div>
     </div>
     {% endfor %}
