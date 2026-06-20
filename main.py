@@ -30,11 +30,13 @@ def home(request: Request, q: str = Query(default="")):
 
     if q:
         search = f"%{q}%"
+
         query = query.filter(
-            (Recipe.title.like(search)) |
-            (Recipe.category.like(search)) |
-            (Recipe.description.like(search)) |
-            (Recipe.tags.like(search))
+            (Recipe.title.like(search))
+            | (Recipe.category.like(search))
+            | (Recipe.description.like(search))
+            | (Recipe.tags.like(search))
+            | (Recipe.ingredients.like(search))
         )
 
     recipes = query.order_by(Recipe.id.desc()).all()
@@ -110,13 +112,12 @@ def add_recipe(
 
     return RedirectResponse(url="/admin", status_code=303)
 
+
 @app.post("/delete/{recipe_id}")
 def delete_recipe(recipe_id: int):
     db = get_db()
 
-    recipe = db.query(Recipe).filter(
-        Recipe.id == recipe_id
-    ).first()
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if recipe:
         db.delete(recipe)
@@ -124,18 +125,14 @@ def delete_recipe(recipe_id: int):
 
     db.close()
 
-    return RedirectResponse(
-        url="/",
-        status_code=303
-    )
+    return RedirectResponse(url="/", status_code=303)
+
 
 @app.get("/edit/{recipe_id}")
 def edit_recipe_page(request: Request, recipe_id: int):
     db = get_db()
 
-    recipe = db.query(Recipe).filter(
-        Recipe.id == recipe_id
-    ).first()
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     db.close()
 
@@ -147,6 +144,7 @@ def edit_recipe_page(request: Request, recipe_id: int):
         name="edit.html",
         context={"recipe": recipe},
     )
+
 
 @app.post("/edit/{recipe_id}")
 def edit_recipe(
@@ -165,9 +163,7 @@ def edit_recipe(
 ):
     db = get_db()
 
-    recipe = db.query(Recipe).filter(
-        Recipe.id == recipe_id
-    ).first()
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
     if recipe:
         recipe.title = title
@@ -186,7 +182,4 @@ def edit_recipe(
 
     db.close()
 
-    return RedirectResponse(
-        url="/admin",
-        status_code=303
-    )
+    return RedirectResponse(url="/admin", status_code=303)
