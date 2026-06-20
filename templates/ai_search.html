@@ -55,7 +55,7 @@
                 <p style="white-space: pre-line;">{{ recipe.instructions }}</p>
             </div>
 
-            <form method="post" action="/ai-save">
+            <form method="post" action="/ai-save" class="ai-save-form">
                 <input type="hidden" name="title" value="{{ recipe.title }}">
                 <input type="hidden" name="category" value="{{ recipe.category }}">
                 <input type="hidden" name="description" value="{{ recipe.description }}">
@@ -85,5 +85,33 @@
     <p style="white-space: pre-line;">{{ ai_answer }}</p>
 </div>
 {% endif %}
+
+<script>
+    document.querySelectorAll(".ai-save-form").forEach((form) => {
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+    
+            const button = form.querySelector(".ai-save-btn");
+            button.disabled = true;
+            button.textContent = "שומר...";
+    
+            const formData = new FormData(form);
+    
+            const response = await fetch("/ai-save", {
+                method: "POST",
+                body: formData,
+            });
+    
+            if (response.ok) {
+                button.textContent = "נשמר ✅";
+                button.classList.add("saved");
+            } else {
+                button.disabled = false;
+                button.textContent = "שמור למאגר";
+                alert("אירעה שגיאה בשמירת המתכון");
+            }
+        });
+    });
+</script>
 
 {% endblock %}

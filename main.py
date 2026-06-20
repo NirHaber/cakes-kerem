@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, Query, Form
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
@@ -332,6 +332,16 @@ def ai_save_recipe(
 
     db.add(recipe)
     db.commit()
+    db.refresh(recipe)
+
+    recipe_id = recipe.id
+
     db.close()
 
-    return RedirectResponse(url="/admin", status_code=303)
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": "המתכון נשמר בהצלחה",
+            "recipe_id": recipe_id,
+        }
+    )
