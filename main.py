@@ -29,17 +29,20 @@ def home(request: Request, q: str = Query(default="")):
     query = db.query(Recipe)
 
     if q:
-        search = f"%{q}%"
+        search_words = q.split()
 
-        query = query.filter(
-            (Recipe.title.like(search))
-            | (Recipe.category.like(search))
-            | (Recipe.description.like(search))
-            | (Recipe.tags.like(search))
-            | (Recipe.ingredients.like(search))
-            | (Recipe.instructions.like(search))
-        )
+        for word in search_words:
+            search = f"%{word}%"
 
+            query = query.filter(
+                (Recipe.title.like(search))
+                | (Recipe.category.like(search))
+                | (Recipe.description.like(search))
+                | (Recipe.tags.like(search))
+                | (Recipe.ingredients.like(search))
+                | (Recipe.instructions.like(search))
+            )
+            
     recipes = query.order_by(Recipe.id.desc()).all()
 
     return templates.TemplateResponse(
