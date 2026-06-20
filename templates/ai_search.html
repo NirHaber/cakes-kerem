@@ -38,11 +38,13 @@
             <h3>{{ recipe.title }}</h3>
             <p>{{ recipe.description }}</p>
 
+            {% if recipe.tags %}
             <div class="tags">
                 {% for tag in recipe.tags.split(",") %}
                 <span>{{ tag.strip() }}</span>
                 {% endfor %}
             </div>
+            {% endif %}
 
             <div class="recipe-meta">
                 <span>⭐ {{ recipe.rating }}</span>
@@ -74,18 +76,17 @@
                 <input type="hidden" name="prep_time" value="{{ recipe.prep_time }}">
                 <input type="hidden" name="tags" value="{{ recipe.tags }}">
                 <input type="hidden" name="source_url" value="">
-            
+
                 <button type="submit" class="ai-save-btn">
                     שמור למאגר
                 </button>
-            </form>            
+            </form>
         </div>
     </div>
     {% endfor %}
 </section>
-{% endif %}
 
-{% if ai_answer and not ai_recipes %}
+{% elif ai_answer %}
 <div class="score-box">
     <h3>תשובת AI גולמית</h3>
     <p style="white-space: pre-line;">{{ ai_answer }}</p>
@@ -96,18 +97,18 @@
     document.querySelectorAll(".ai-save-form").forEach((form) => {
         form.addEventListener("submit", async (event) => {
             event.preventDefault();
-    
+
             const button = form.querySelector(".ai-save-btn");
             button.disabled = true;
             button.textContent = "שומר...";
-    
+
             const formData = new FormData(form);
-    
+
             const response = await fetch("/ai-save", {
                 method: "POST",
                 body: formData,
             });
-    
+
             if (response.ok) {
                 button.textContent = "נשמר ✅";
                 button.classList.add("saved");

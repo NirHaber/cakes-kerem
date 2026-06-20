@@ -170,6 +170,7 @@ def ai_search(request: Request, user_request: str = Form(...)):
 
         try:
             ai_recipes = json.loads(ai_answer)
+            ai_answer = ""
         except json.JSONDecodeError:
             ai_recipes = []
 
