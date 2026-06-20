@@ -37,6 +37,7 @@ def home(request: Request, q: str = Query(default="")):
             | (Recipe.description.like(search))
             | (Recipe.tags.like(search))
             | (Recipe.ingredients.like(search))
+            | (Recipe.instructions.like(search))
         )
 
     recipes = query.order_by(Recipe.id.desc()).all()
