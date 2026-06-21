@@ -124,9 +124,10 @@ def recipe_page(request: Request, recipe_id: int):
 
 
 @app.get("/admin")
-def admin_page(request: Request):
+def admin_page(request: Request, selected_image: str = ""):
     db = get_db()
     recipes = db.query(Recipe).order_by(Recipe.id.desc()).all()
+    db.close()
 
     return templates.TemplateResponse(
         request=request,
@@ -134,10 +135,23 @@ def admin_page(request: Request):
         context={
             "recipes": recipes,
             "recipe_images": get_recipe_images(),
+            "selected_image": selected_image,
         },
     )
 
+@app.get("/image-picker")
+def image_picker_page(request: Request, return_to: str = "/admin"):
+    recipe_images = get_recipe_images()
 
+    return templates.TemplateResponse(
+        request=request,
+        name="image_picker.html",
+        context={
+            "recipe_images": recipe_images,
+            "return_to": return_to,
+        },
+    )
+    
 @app.get("/ai-search")
 def ai_search_page(request: Request):
     return templates.TemplateResponse(

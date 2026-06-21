@@ -20,18 +20,37 @@
 
     <textarea name="instructions" placeholder="שלבי הכנה" required>{{ recipe.instructions }}</textarea>
 
+    <label>תמונה למתכון</label>
+
     <input name="image_url" value="{{ recipe.image_url }}" placeholder="קישור לתמונה חיצונית">
 
-    <label>או בחר תמונה מספריית הפרויקט</label>
-    <select name="image_file">
-        <option value="">השאר את התמונה הנוכחית</option>
+    {% if recipe.image_url %}
+    <div style="
+        width: 260px;
+        max-width: 260px;
+        background: #fffaf5;
+        border: 1px solid #fed7aa;
+        border-radius: 18px;
+        padding: 12px;
+        margin: 12px 0 18px;
+    ">
+        <p style="margin-top: 0;">התמונה הנוכחית:</p>
 
-        {% for image in recipe_images %}
-        <option value="{{ image }}" {% if recipe.image_url==image %}selected{% endif %}>
-            {{ image }}
-        </option>
-        {% endfor %}
-    </select>
+        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" style="
+                width: 100%;
+                height: 170px;
+                object-fit: cover;
+                border-radius: 14px;
+                display: block;
+            ">
+    </div>
+    {% endif %}
+
+    <input type="hidden" name="image_file" value="">
+
+    <a href="/image-picker?return_to=/edit/{{ recipe.id }}" class="image-picker-btn">
+        בחר תמונה מהגלריה
+    </a>
 
     <input name="rating" type="number" step="0.1" min="1" max="5" value="{{ recipe.rating }}" placeholder="דירוג 1-5"
         required>
