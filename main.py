@@ -24,9 +24,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 load_dotenv()
 
-gemini_client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
+gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 def get_recipe_images():
@@ -124,7 +122,11 @@ def recipe_page(request: Request, recipe_id: int):
 
 
 @app.get("/admin")
-def admin_page(request: Request, selected_image: str = ""):
+def admin_page(
+    request: Request,
+    selected_image: str = "",
+    picker_cancel: str = "",
+):
     db = get_db()
     recipes = db.query(Recipe).order_by(Recipe.id.desc()).all()
     db.close()
@@ -136,8 +138,10 @@ def admin_page(request: Request, selected_image: str = ""):
             "recipes": recipes,
             "recipe_images": get_recipe_images(),
             "selected_image": selected_image,
+            "picker_cancel": picker_cancel,
         },
     )
+
 
 @app.get("/image-picker")
 def image_picker_page(request: Request, return_to: str = "/admin"):
@@ -151,7 +155,8 @@ def image_picker_page(request: Request, return_to: str = "/admin"):
             "return_to": return_to,
         },
     )
-    
+
+
 @app.get("/ai-search")
 def ai_search_page(request: Request):
     return templates.TemplateResponse(
@@ -288,7 +293,12 @@ def delete_recipe(recipe_id: int):
 
 
 @app.get("/edit/{recipe_id}")
-def edit_recipe_page(request: Request, recipe_id: int):
+def edit_recipe_page(
+    request: Request,
+    recipe_id: int,
+    selected_image: str = "",
+    picker_cancel: str = "",
+):
     db = get_db()
 
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
@@ -304,6 +314,8 @@ def edit_recipe_page(request: Request, recipe_id: int):
         context={
             "recipe": recipe,
             "recipe_images": get_recipe_images(),
+            "selected_image": selected_image,
+            "picker_cancel": picker_cancel,
         },
     )
 

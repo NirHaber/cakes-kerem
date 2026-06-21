@@ -67,7 +67,8 @@
                 <span>עלות: {{ recipe.cost }}</span>
                 <span>{{ recipe.prep_time }}</span>
 
-                <form method="post" action="/delete/{{ recipe.id }}" onsubmit="return confirm('למחוק את המתכון?');">
+                <form method="post" action="/delete/{{ recipe.id }}"
+                    onsubmit="return confirm('האם אתה בטוח שברצונך למחוק את המתכון לצמיתות?')">
                     <button type="submit" class="delete-btn">
                         מחק
                     </button>

@@ -9,20 +9,18 @@
     </div>
 </section>
 
-<form class="admin-form" method="post" action="/admin/add">
+<form id="adminRecipeForm" class="admin-form" method="post" action="/admin/add">
     <input name="title" placeholder="שם המתכון" required>
     <input name="category" placeholder="קטגוריה" required>
     <textarea name="description" placeholder="תיאור קצר" required></textarea>
     <textarea name="ingredients" placeholder="מרכיבים (כל מרכיב בשורה נפרדת)"></textarea>
     <textarea name="instructions" placeholder="שלבי הכנה (כל שלב בשורה נפרדת)"></textarea>
 
-    <input name="image_url" placeholder="קישור לתמונה חיצונית">
-
     <label>תמונה למתכון</label>
 
     <input name="image_url" value="{{ selected_image or '' }}" placeholder="קישור לתמונה חיצונית או תמונה שנבחרה">
 
-    <a href="/image-picker" class="image-picker-btn">
+    <a href="/image-picker?return_to=/admin" class="image-picker-btn" onclick="saveRecipeForm('adminRecipeForm')">
         בחר תמונה מהגלריה
     </a>
 
@@ -99,7 +97,9 @@
                     ערוך
                 </a>
 
-                <form method="post" action="/delete/{{ recipe.id }}">
+                <form method="post" action="/delete/{{ recipe.id }}"
+                    onsubmit="return confirm('האם אתה בטוח שברצונך למחוק את המתכון לצמיתות?')">
+
                     <button type="submit" class="admin-delete-btn">
                         מחק
                     </button>
@@ -110,4 +110,56 @@
 
     {% endfor %}
 </section>
+
+<script>
+    function saveRecipeForm(formId) {
+        const form = document.getElementById(formId);
+        const data = {};
+
+        form.querySelectorAll("input, textarea, select").forEach((field) => {
+            if (field.name) {
+                data[field.name] = field.value;
+            }
+        });
+
+        sessionStorage.setItem(formId, JSON.stringify(data));
+    }
+
+    function restoreRecipeForm(formId) {
+        const saved = sessionStorage.getItem(formId);
+
+        if (!saved) {
+            return;
+        }
+
+        const data = JSON.parse(saved);
+        const form = document.getElementById(formId);
+
+        Object.keys(data).forEach((name) => {
+            const field = form.querySelector(`[name="${name}"]`);
+            if (field) {
+                field.value = data[name];
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const selectedImage = "{{ selected_image or '' }}";
+        const pickerCancel = "{{ picker_cancel or '' }}";
+
+        if (selectedImage || pickerCancel) {
+            restoreRecipeForm("adminRecipeForm");
+
+            if (selectedImage) {
+                const imageField = document.querySelector('[name="image_url"]');
+                if (imageField) {
+                    imageField.value = selectedImage;
+                }
+            }
+        } else {
+            sessionStorage.removeItem("adminRecipeForm");
+        }
+    });
+</script>
+
 {% endblock %}

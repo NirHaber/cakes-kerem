@@ -8,7 +8,7 @@
         gap: 18px;
         margin-top: 24px;
     }
-    
+
     .image-picker-card {
         aspect-ratio: 1 / 1;
         overflow: hidden;
@@ -19,14 +19,14 @@
         position: relative;
         box-shadow: 0 8px 20px rgba(124, 45, 18, 0.14);
     }
-    
+
     .image-picker-card img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
     }
-    
+
     .image-picker-card span {
         position: absolute;
         bottom: 0;
@@ -37,13 +37,13 @@
         font-size: 13px;
         text-align: center;
     }
-    
+
     @media (max-width: 900px) {
         .image-picker-grid {
             grid-template-columns: repeat(3, 1fr);
         }
     }
-    
+
     @media (max-width: 520px) {
         .image-picker-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -56,24 +56,34 @@
         <span class="hero-badge">בחירת תמונה</span>
         <h2>בחר תמונה למתכון</h2>
         <p>לחיצה על תמונה תחזיר אותך למסך הניהול עם התמונה שנבחרה.</p>
-
-        <a class="back-link" href="/admin">
-            חזרה לניהול ללא בחירה
-        </a>
     </div>
 </section>
 
 <section class="image-picker-grid">
     {% for image in recipe_images %}
-    <a class="image-picker-card" href="/admin?selected_image={{ image }}">
+    <a class="image-picker-card" href="{{ return_to }}?selected_image={{ image }}">
         <img src="{{ image }}" alt="תמונה למתכון">
         <span>{{ image.split('/')[-1] }}</span>
     </a>
     {% endfor %}
 </section>
 
-<div class="picker-actions">
-    <a class="image-picker-btn" href="{{ return_to }}">
+<div style="
+    text-align: center;
+    margin-top: 30px;
+">
+    <a
+        href="{{ return_to }}?picker_cancel=1"
+        style="
+            display: inline-block;
+            padding: 12px 24px;
+            background: #9a3412;
+            color: white;
+            text-decoration: none;
+            border-radius: 999px;
+            font-weight: 700;
+        "
+    >
         חזרה ללא בחירת תמונה
     </a>
 </div>
