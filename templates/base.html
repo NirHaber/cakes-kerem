@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>עוגות קרם</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div>
+                <h1>עוגות קרם</h1>
+                <p>מאגר מתכוני עוגות וקינוחים עם חיפוש ודירוג חכם</p>
+            </div>
+
+            <nav class="site-nav">
+                <a href="/">בית</a>
+                <a href="/">מתכונים</a>
+                <a href="/ai-search">חיפוש AI</a>
+                <a href="/admin">ניהול</a>
+                <a href="/">מועדפים</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>© עוגות קרם - מתכונים חכמים לעוגות וקינוחים</p>
+        </div>
+    </footer>
+</body>
+</html>

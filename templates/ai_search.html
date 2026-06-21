@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-text">
+        <span class="hero-badge">חיפוש AI</span>
+        <h2>חיפוש מתכונים חכם</h2>
+        <p>כתוב מה יש לך בבית, ו־Gemini יציע מתכונים חדשים לפי המבנה של האתר.</p>
+
+        <form class="admin-form" method="post" action="/ai-search">
+            <textarea
+                name="user_request"
+                placeholder="לדוגמה: יש לי שוקולד, שמנת וביסקוויטים"
+                required
+            >{{ user_request or "" }}</textarea>
+
+            <button type="submit">
+                חפש עם AI
+            </button>
+        </form>
+    </div>
+</section>
+
+{% if ai_recipes %}
+<h2 class="admin-title">מתכונים שהוצעו על ידי Gemini</h2>
+
+<section class="recipes-grid">
+    {% for recipe in ai_recipes %}
+    <div class="recipe-card">
+        {% if recipe.image_url %}
+        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
+        {% else %}
+        <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307" alt="{{ recipe.title }}">
+        {% endif %}
+
+        <div class="recipe-content">
+            <span class="category">{{ recipe.category }}</span>
+            <h3>{{ recipe.title }}</h3>
+            <p>{{ recipe.description }}</p>
+
+            {% if recipe.tags %}
+            <div class="tags">
+                {% for tag in recipe.tags.split(",") %}
+                <span>{{ tag.strip() }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="recipe-meta">
+                <span>⭐ {{ recipe.rating }}</span>
+                <span>קושי: {{ recipe.difficulty }}</span>
+                <span>עלות: {{ recipe.cost }}</span>
+                <span>{{ recipe.prep_time }}</span>
+            </div>
+
+            <div class="recipe-section ai-scroll-box">
+                <h3>מרכיבים</h3>
+                <p style="white-space: pre-line;">{{ recipe.ingredients }}</p>
+            </div>
+
+            <div class="recipe-section ai-scroll-box">
+                <h3>הוראות הכנה</h3>
+                <p style="white-space: pre-line;">{{ recipe.instructions }}</p>
+            </div>
+
+            <form method="post" action="/ai-save" class="ai-save-form">
+                <input type="hidden" name="title" value="{{ recipe.title }}">
+                <input type="hidden" name="category" value="{{ recipe.category }}">
+                <input type="hidden" name="description" value="{{ recipe.description }}">
+                <input type="hidden" name="image_url" value="{{ recipe.image_url or '' }}">
+                <input type="hidden" name="ingredients" value="{{ recipe.ingredients }}">
+                <input type="hidden" name="instructions" value="{{ recipe.instructions }}">
+                <input type="hidden" name="rating" value="{{ recipe.rating }}">
+                <input type="hidden" name="difficulty" value="{{ recipe.difficulty }}">
+                <input type="hidden" name="cost" value="{{ recipe.cost }}">
+                <input type="hidden" name="prep_time" value="{{ recipe.prep_time }}">
+                <input type="hidden" name="tags" value="{{ recipe.tags }}">
+                <input type="hidden" name="source_url" value="">
+
+                <button type="submit" class="ai-save-btn">
+                    שמור למאגר
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</section>
+
+{% elif ai_answer %}
+<div class="score-box">
+    <h3>תשובת AI גולמית</h3>
+    <p style="white-space: pre-line;">{{ ai_answer }}</p>
+</div>
+{% endif %}
+
+<script>
+    document.querySelectorAll(".ai-save-form").forEach((form) => {
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const button = form.querySelector(".ai-save-btn");
+            button.disabled = true;
+            button.textContent = "שומר...";
+
+            const formData = new FormData(form);
+
+            const response = await fetch("/ai-save", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (response.ok) {
+                button.textContent = "נשמר ✅";
+                button.classList.add("saved");
+            } else {
+                button.disabled = false;
+                button.textContent = "שמור למאגר";
+                alert("אירעה שגיאה בשמירת המתכון");
+            }
+        });
+    });
+</script>
+
+{% endblock %}

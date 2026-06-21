@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-text">
+        <span class="hero-badge">ניהול מתכונים</span>
+        <h2>הוספת מתכון חדש</h2>
+        <p>המתכון יישמר במסד הנתונים SQLite.</p>
+    </div>
+</section>
+
+<form class="admin-form" method="post" action="/admin/add">
+    <input name="title" placeholder="שם המתכון" required>
+    <input name="category" placeholder="קטגוריה" required>
+    <textarea name="description" placeholder="תיאור קצר" required></textarea>
+    <textarea name="ingredients" placeholder="מרכיבים (כל מרכיב בשורה נפרדת)"></textarea>
+    <textarea name="instructions" placeholder="שלבי הכנה (כל שלב בשורה נפרדת)"></textarea>
+
+    <input name="image_url" placeholder="קישור לתמונה חיצונית">
+
+    <label>או בחר תמונה מספריית הפרויקט</label>
+    <select name="image_file">
+        <option value="">ללא בחירה</option>
+        {% for image in recipe_images %}
+        <option value="{{ image }}">{{ image }}</option>
+        {% endfor %}
+    </select>
+
+    <input name="rating" type="number" step="0.1" min="1" max="5" placeholder="דירוג 1-5" required>
+    <input name="difficulty" placeholder="רמת קושי" required>
+    <input name="cost" placeholder="עלות" required>
+    <input name="prep_time" placeholder="זמן הכנה" required>
+    <input name="tags" placeholder="תגיות מופרדות בפסיקים">
+
+    <button type="submit">שמור מתכון</button>
+</form>
+
+<h2 class="admin-title">מתכונים קיימים</h2>
+
+<section class="recipes-grid">
+    {% for recipe in recipes %}
+
+    <div class="recipe-card">
+        <a href="/recipe/{{ recipe.id }}">
+            {% if recipe.image_url %}
+            <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
+            {% else %}
+            <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307" alt="{{ recipe.title }}">
+            {% endif %}
+        </a>
+
+        <div class="recipe-content">
+            <span class="category">{{ recipe.category }}</span>
+
+            <a href="/recipe/{{ recipe.id }}" class="admin-card-title-link">
+                <h3>{{ recipe.title }}</h3>
+            </a>
+
+            <p>{{ recipe.description }}</p>
+
+            <div class="recipe-meta">
+                <span>⭐ {{ recipe.rating }}</span>
+                <span>קושי: {{ recipe.difficulty }}</span>
+                <span>עלות: {{ recipe.cost }}</span>
+                <span>{{ recipe.prep_time }}</span>
+            </div>
+
+            <div class="admin-actions">
+                <a href="/edit/{{ recipe.id }}" class="admin-edit-btn">
+                    ערוך
+                </a>
+
+                <form method="post" action="/delete/{{ recipe.id }}">
+                    <button type="submit" class="admin-delete-btn">
+                        מחק
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% endfor %}
+</section>
+{% endblock %}

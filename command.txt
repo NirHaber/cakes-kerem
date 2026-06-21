@@ -1,0 +1,6 @@
+התקנת חבילות
+pip install -r requirements.txt
+
+הרצת התוכנה
+uvicorn main:app --reload
+

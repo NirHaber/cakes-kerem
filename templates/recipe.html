@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if recipe %}
+<article class="recipe-page">
+
+    {% if recipe.image_url %}
+    <img class="recipe-hero-image" src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
+    {% else %}
+    <img class="recipe-hero-image"
+        src="https://images.unsplash.com/photo-1551024506-0bccd828d307"
+        alt="{{ recipe.title }}">
+    {% endif %}
+
+    <div class="recipe-details">
+        <span class="category">{{ recipe.category }}</span>
+        <h2>{{ recipe.title }}</h2>
+        <p>{{ recipe.description }}</p>
+
+        <div class="score-box">
+            <h3>דירוג מתכון</h3>
+            <p>⭐ דירוג כללי: {{ recipe.rating }}</p>
+            <p>רמת קושי: {{ recipe.difficulty }}</p>
+            <p>עלות חומרים: {{ recipe.cost }}</p>
+            <p>זמן הכנה: {{ recipe.prep_time }}</p>
+        </div>
+
+        <div class="recipe-section">
+            <h3>מרכיבים</h3>
+            <ul>
+                {% for item in recipe.ingredients.splitlines() %}
+                    {% if item.strip() %}
+                    <li>{{ item }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="recipe-section">
+            <h3>שלבי הכנה</h3>
+            <ol>
+                {% for step in recipe.instructions.splitlines() %}
+                    {% if step.strip() %}
+                    <li>{{ step }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ol>
+        </div>
+
+        <a class="back-link" href="/">חזרה לדף הבית</a>
+    </div>
+</article>
+{% else %}
+<h2>המתכון לא נמצא</h2>
+<a class="back-link" href="/">חזרה לדף הבית</a>
+{% endif %}
+{% endblock %}
