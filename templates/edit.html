@@ -10,95 +10,41 @@
 </section>
 
 <form class="admin-form" method="post" action="/edit/{{ recipe.id }}">
-    <input
-        name="title"
-        value="{{ recipe.title }}"
-        placeholder="שם המתכון"
-        required
-    >
+    <input name="title" value="{{ recipe.title }}" placeholder="שם המתכון" required>
 
-    <input
-        name="category"
-        value="{{ recipe.category }}"
-        placeholder="קטגוריה"
-        required
-    >
+    <input name="category" value="{{ recipe.category }}" placeholder="קטגוריה" required>
 
-    <textarea
-        name="description"
-        placeholder="תיאור קצר"
-        required
-    >{{ recipe.description }}</textarea>
+    <textarea name="description" placeholder="תיאור קצר" required>{{ recipe.description }}</textarea>
 
-    <textarea
-        name="ingredients"
-        placeholder="מרכיבים"
-        required
-    >{{ recipe.ingredients }}</textarea>
+    <textarea name="ingredients" placeholder="מרכיבים" required>{{ recipe.ingredients }}</textarea>
 
-    <textarea
-        name="instructions"
-        placeholder="שלבי הכנה"
-        required
-    >{{ recipe.instructions }}</textarea>
+    <textarea name="instructions" placeholder="שלבי הכנה" required>{{ recipe.instructions }}</textarea>
 
-    <input
-        name="image_url"
-        value="{{ recipe.image_url }}"
-        placeholder="קישור לתמונה חיצונית"
-    >
+    <input name="image_url" value="{{ recipe.image_url }}" placeholder="קישור לתמונה חיצונית">
 
     <label>או בחר תמונה מספריית הפרויקט</label>
     <select name="image_file">
         <option value="">השאר את התמונה הנוכחית</option>
 
         {% for image in recipe_images %}
-        <option
-            value="{{ image }}"
-            {% if recipe.image_url == image %}selected{% endif %}
-        >
+        <option value="{{ image }}" {% if recipe.image_url==image %}selected{% endif %}>
             {{ image }}
         </option>
         {% endfor %}
     </select>
 
-    <input
-        name="rating"
-        type="number"
-        step="0.1"
-        min="1"
-        max="5"
-        value="{{ recipe.rating }}"
-        placeholder="דירוג 1-5"
-        required
-    >
+    <input name="rating" type="number" step="0.1" min="1" max="5" value="{{ recipe.rating }}" placeholder="דירוג 1-5"
+        required>
 
-    <input
-        name="difficulty"
-        value="{{ recipe.difficulty }}"
-        placeholder="רמת קושי"
-        required
-    >
+    <input name="difficulty" value="{{ recipe.difficulty }}" placeholder="רמת קושי" required>
 
-    <input
-        name="cost"
-        value="{{ recipe.cost }}"
-        placeholder="עלות"
-        required
-    >
+    <input name="cost" value="{{ recipe.cost }}" placeholder="עלות" required>
 
-    <input
-        name="prep_time"
-        value="{{ recipe.prep_time }}"
-        placeholder="זמן הכנה"
-        required
-    >
+    <input name="prep_time" value="{{ recipe.prep_time }}" placeholder="זמן הכנה" required>
 
-    <input
-        name="tags"
-        value="{{ recipe.tags }}"
-        placeholder="תגיות מופרדות בפסיקים"
-    >
+    <input name="tags" value="{{ recipe.tags }}" placeholder="תגיות מופרדות בפסיקים">
+
+    <input name="created_by" placeholder="שם היוצר / המעדכן" value="{{ recipe.created_by or 'Nir' }}">
 
     <button type="submit">
         שמור שינויים

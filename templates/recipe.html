@@ -7,13 +7,19 @@
     {% if recipe.image_url %}
     <img class="recipe-hero-image" src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
     {% else %}
-    <img class="recipe-hero-image"
-        src="https://images.unsplash.com/photo-1551024506-0bccd828d307"
+    <img class="recipe-hero-image" src="https://images.unsplash.com/photo-1551024506-0bccd828d307"
         alt="{{ recipe.title }}">
     {% endif %}
 
     <div class="recipe-details">
         <span class="category">{{ recipe.category }}</span>
+
+        {% if recipe.source == "gemini" %}
+        <p>🤖 נוצר ע"י Gemini</p>
+        {% else %}
+        <p>✍️ נוצר ע"י {{ recipe.created_by or "ידני" }}</p>
+        {% endif %}
+
         <h2>{{ recipe.title }}</h2>
         <p>{{ recipe.description }}</p>
 
@@ -29,9 +35,9 @@
             <h3>מרכיבים</h3>
             <ul>
                 {% for item in recipe.ingredients.splitlines() %}
-                    {% if item.strip() %}
-                    <li>{{ item }}</li>
-                    {% endif %}
+                {% if item.strip() %}
+                <li>{{ item }}</li>
+                {% endif %}
                 {% endfor %}
             </ul>
         </div>
@@ -40,9 +46,9 @@
             <h3>שלבי הכנה</h3>
             <ol>
                 {% for step in recipe.instructions.splitlines() %}
-                    {% if step.strip() %}
-                    <li>{{ step }}</li>
-                    {% endif %}
+                {% if step.strip() %}
+                <li>{{ step }}</li>
+                {% endif %}
                 {% endfor %}
             </ol>
         </div>

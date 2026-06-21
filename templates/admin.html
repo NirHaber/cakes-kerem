@@ -32,6 +32,7 @@
     <input name="prep_time" placeholder="זמן הכנה" required>
     <input name="tags" placeholder="תגיות מופרדות בפסיקים">
 
+    <input name="created_by" placeholder="שם היוצר / המעדכן" value="Nir">
     <button type="submit">שמור מתכון</button>
 </form>
 
@@ -51,6 +52,12 @@
 
         <div class="recipe-content">
             <span class="category">{{ recipe.category }}</span>
+
+            {% if recipe.source == "gemini" %}
+            <span class="category">🤖 Gemini</span>
+            {% else %}
+            <span class="category">✍️ {{ recipe.created_by or "ידני" }}</span>
+            {% endif %}
 
             <a href="/recipe/{{ recipe.id }}" class="admin-card-title-link">
                 <h3>{{ recipe.title }}</h3>

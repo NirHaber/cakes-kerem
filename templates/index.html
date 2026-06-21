@@ -23,7 +23,7 @@
             <button type="submit" class="search-btn">
                 חפש
             </button>
-            
+
             <a href="/" class="clear-link">
                 נקה
             </a>
@@ -45,6 +45,13 @@
 
         <div class="recipe-content">
             <span class="category">{{ recipe.category }}</span>
+
+            {% if recipe.source == "gemini" %}
+            <span class="category">🤖 Gemini</span>
+            {% else %}
+            <span class="category">✍️ {{ recipe.created_by or "ידני" }}</span>
+            {% endif %}
+
             <h3>{{ recipe.title }}</h3>
             <p>{{ recipe.description }}</p>
 

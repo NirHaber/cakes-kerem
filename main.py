@@ -228,6 +228,7 @@ def add_recipe(
     cost: str = Form(...),
     prep_time: str = Form(...),
     tags: str = Form(""),
+    created_by: str = Form("Nir"),
 ):
     db = get_db()
 
@@ -247,6 +248,7 @@ def add_recipe(
         tags=tags,
         source="manual",
         source_url="",
+        created_by=created_by,
     )
 
     db.add(recipe)
@@ -307,6 +309,7 @@ def edit_recipe(
     cost: str = Form(...),
     prep_time: str = Form(...),
     tags: str = Form(""),
+    created_by: str = Form("Nir"),
 ):
     db = get_db()
 
@@ -326,6 +329,7 @@ def edit_recipe(
         recipe.cost = cost
         recipe.prep_time = prep_time
         recipe.tags = tags
+        recipe.created_by = created_by
 
         db.commit()
 
@@ -365,6 +369,7 @@ def ai_save_recipe(
         tags=tags,
         source="gemini",
         source_url=source_url,
+        created_by="Gemini",
     )
 
     db.add(recipe)

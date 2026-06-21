@@ -24,6 +24,7 @@ class Recipe(Base):
     tags = Column(Text)
     source = Column(String, default="manual")
     source_url = Column(String, default="")
+    created_by = Column(String(100), default="Nir")
 
     @property
     def tags_list(self):
