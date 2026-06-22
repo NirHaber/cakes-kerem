@@ -116,6 +116,36 @@ def get_recipe_images_with_usage():
 
     return result
 
+def is_recipe_image_used(image_url: str):
+    db = get_db()
+
+    recipe = db.query(Recipe).filter(
+        Recipe.image_url == image_url
+    ).first()
+
+    db.close()
+
+    return recipe is not None
+
+
+def delete_recipe_image_file(image_url: str):
+    images_prefix = "/static/images/recipes/"
+
+    if not image_url.startswith(images_prefix):
+        return False
+
+    filename = image_url.replace(images_prefix, "", 1)
+    file_path = os.path.join("static/images/recipes", filename)
+
+    if not os.path.exists(file_path):
+        return False
+
+    if is_recipe_image_used(image_url):
+        return False
+
+    os.remove(file_path)
+    return True
+
 def get_db():
     db = SessionLocal()
     try:
@@ -218,18 +248,34 @@ def admin_page(
 
 
 @app.get("/image-picker")
-def image_picker_page(request: Request, return_to: str = "/admin"):
+def image_picker_page(
+    request: Request,
+    return_to: str = "/admin",
+    current_image: str = "",
+):
     recipe_images = get_recipe_images_with_usage()
-    
+
     return templates.TemplateResponse(
         request=request,
         name="image_picker.html",
         context={
             "recipe_images": recipe_images,
             "return_to": return_to,
+            "current_image": current_image,
         },
     )
+    
+@app.post("/image-delete")
+def image_delete(
+    image_url: str = Form(...),
+    return_to: str = Form("/admin"),
+):
+    delete_recipe_image_file(image_url)
 
+    return RedirectResponse(
+        url=f"/image-picker?return_to={return_to}",
+        status_code=303
+    )
 
 @app.get("/ai-search")
 def ai_search_page(request: Request):

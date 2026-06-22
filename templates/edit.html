@@ -24,11 +24,8 @@
 
     <label>תמונה למתכון</label>
 
-    <input
-        name="image_url"
-        value="{{ selected_image or recipe.image_url or '' }}"
-        placeholder="קישור לתמונה חיצונית או תמונה שנבחרה"
-    >
+    <input name="image_url" value="{{ selected_image or recipe.image_url or '' }}"
+        placeholder="קישור לתמונה חיצונית או תמונה שנבחרה">
 
     <label class="upload-image-btn">
         בחר קובץ מהמחשב
@@ -42,11 +39,8 @@
         <img id="uploadedImagePreview" src="" alt="תמונה שנבחרה מהמחשב">
     </div>
 
-    <a
-        href="/image-picker?return_to=/edit/{{ recipe.id }}"
-        class="image-picker-btn"
-        onclick="saveRecipeForm('editRecipeForm')"
-    >
+    <a href="/image-picker?return_to=/edit/{{ recipe.id }}" class="image-picker-btn"
+        onclick="openImagePicker(event, 'editRecipeForm')">
         בחר תמונה מהגלריה
     </a>
 
@@ -61,30 +55,19 @@
     ">
         <p style="margin-top: 0;">התמונה הנוכחית:</p>
 
-        <img
-            id="currentRecipeImage"
+        <img id="currentRecipeImage"
             src="{{ selected_image or recipe.image_url or 'https://images.unsplash.com/photo-1551024506-0bccd828d307' }}"
-            alt="{{ recipe.title }}"
-            style="
+            alt="{{ recipe.title }}" style="
                 width: 100%;
                 height: 170px;
                 object-fit: cover;
                 border-radius: 14px;
                 display: block;
-            "
-        >
+            ">
     </div>
 
-    <input
-        name="rating"
-        type="number"
-        step="0.1"
-        min="1"
-        max="5"
-        value="{{ recipe.rating }}"
-        placeholder="דירוג 1-5"
-        required
-    >
+    <input name="rating" type="number" step="0.1" min="1" max="5" value="{{ recipe.rating }}" placeholder="דירוג 1-5"
+        required>
 
     <input name="difficulty" value="{{ recipe.difficulty }}" placeholder="רמת קושי" required>
 
@@ -136,6 +119,24 @@
                 field.value = data[name];
             }
         });
+    }
+
+    function openImagePicker(event, formId) {
+        event.preventDefault();
+
+        saveRecipeForm(formId);
+
+        const link = event.currentTarget;
+        const imageField = document.querySelector('[name="image_url"]');
+        const currentImage = imageField ? imageField.value : "";
+
+        let url = link.getAttribute("href");
+
+        if (currentImage) {
+            url += `&current_image=${encodeURIComponent(currentImage)}`;
+        }
+
+        window.location.href = url;
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -204,4 +205,5 @@
         }
     });
 </script>
+
 {% endblock %}

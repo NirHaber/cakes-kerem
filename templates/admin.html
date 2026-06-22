@@ -32,7 +32,8 @@
         <img id="uploadedImagePreview" src="" alt="תמונה שנבחרה מהמחשב">
     </div>
 
-    <a href="/image-picker?return_to=/admin" class="image-picker-btn" onclick="saveRecipeForm('adminRecipeForm')">
+    <a href="/image-picker?return_to=/admin" class="image-picker-btn"
+        onclick="openImagePicker(event, 'adminRecipeForm')">
         בחר תמונה מהגלריה
     </a>
 
@@ -155,6 +156,24 @@
         });
     }
 
+    function openImagePicker(event, formId) {
+        event.preventDefault();
+
+        saveRecipeForm(formId);
+
+        const link = event.currentTarget;
+        const imageField = document.querySelector('[name="image_url"]');
+        const currentImage = imageField ? imageField.value : "";
+
+        let url = link.getAttribute("href");
+
+        if (currentImage) {
+            url += `&current_image=${encodeURIComponent(currentImage)}`;
+        }
+
+        window.location.href = url;
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         const selectedImage = "{{ selected_image or '' }}";
         const pickerCancel = "{{ picker_cancel or '' }}";
@@ -189,6 +208,7 @@
                 }
             });
         }
+
         if (selectedImage || pickerCancel) {
             restoreRecipeForm("adminRecipeForm");
 
@@ -211,6 +231,6 @@
                 });
             }
         }
-    });</script>
-
+    });
+</script>
 {% endblock %}
