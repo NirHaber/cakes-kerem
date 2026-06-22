@@ -9,26 +9,48 @@
     </div>
 </section>
 
-<form id="editRecipeForm" class="admin-form" method="post" action="/edit/{{ recipe.id }}">
+<form id="editRecipeForm" class="admin-form" method="post" action="/edit/{{ recipe.id }}" enctype="multipart/form-data">
     <input name="title" value="{{ recipe.title }}" placeholder="שם המתכון" required>
 
     <input name="category" value="{{ recipe.category }}" placeholder="קטגוריה" required>
 
     <textarea name="description" placeholder="תיאור קצר" required>{{ recipe.description }}</textarea>
 
-    <textarea name="ingredients" placeholder="מרכיבים" required>{{ recipe.ingredients }}</textarea>
+    <textarea name="ingredients" placeholder="מרכיבים">{{ recipe.ingredients }}</textarea>
 
-    <textarea name="instructions" placeholder="שלבי הכנה" required>{{ recipe.instructions }}</textarea>
+    <textarea name="instructions" placeholder="שלבי הכנה">{{ recipe.instructions }}</textarea>
+
+    <div id="image-section"></div>
 
     <label>תמונה למתכון</label>
 
     <input
         name="image_url"
-        value="{{ recipe.image_url }}"
-        placeholder="קישור לתמונה חיצונית"
+        value="{{ selected_image or recipe.image_url or '' }}"
+        placeholder="קישור לתמונה חיצונית או תמונה שנבחרה"
     >
 
-    <div style="
+    <label class="upload-image-btn">
+        בחר קובץ מהמחשב
+        <input type="file" name="image_file" accept="image/*">
+    </label>
+
+    <span id="selectedFileName" class="selected-file-name"></span>
+
+    <div id="uploadedImagePreviewBox" class="selected-image-preview" style="display: none;">
+        <p>התמונה שנבחרה מהמחשב:</p>
+        <img id="uploadedImagePreview" src="" alt="תמונה שנבחרה מהמחשב">
+    </div>
+
+    <a
+        href="/image-picker?return_to=/edit/{{ recipe.id }}"
+        class="image-picker-btn"
+        onclick="saveRecipeForm('editRecipeForm')"
+    >
+        בחר תמונה מהגלריה
+    </a>
+
+    <div id="pickerImagePreviewBox" style="
         width: 260px;
         max-width: 260px;
         background: #fffaf5;
@@ -41,7 +63,7 @@
 
         <img
             id="currentRecipeImage"
-            src="{{ recipe.image_url or 'https://images.unsplash.com/photo-1551024506-0bccd828d307' }}"
+            src="{{ selected_image or recipe.image_url or 'https://images.unsplash.com/photo-1551024506-0bccd828d307' }}"
             alt="{{ recipe.title }}"
             style="
                 width: 100%;
@@ -52,16 +74,6 @@
             "
         >
     </div>
-
-    <input type="hidden" name="image_file" value="">
-
-    <a
-        href="/image-picker?return_to=/edit/{{ recipe.id }}"
-        class="image-picker-btn"
-        onclick="saveRecipeForm('editRecipeForm')"
-    >
-        בחר תמונה מהגלריה
-    </a>
 
     <input
         name="rating"
@@ -99,7 +111,7 @@
         const data = {};
 
         form.querySelectorAll("input, textarea, select").forEach((field) => {
-            if (field.name) {
+            if (field.name && field.type !== "file") {
                 data[field.name] = field.value;
             }
         });
@@ -120,7 +132,7 @@
         Object.keys(data).forEach((name) => {
             const field = form.querySelector(`[name="${name}"]`);
 
-            if (field) {
+            if (field && field.type !== "file") {
                 field.value = data[name];
             }
         });
@@ -129,6 +141,37 @@
     document.addEventListener("DOMContentLoaded", () => {
         const selectedImage = "{{ selected_image or '' }}";
         const pickerCancel = "{{ picker_cancel or '' }}";
+
+        const imageFileField = document.querySelector('[name="image_file"]');
+        const imageUrlField = document.querySelector('[name="image_url"]');
+
+        if (imageFileField && imageUrlField) {
+            imageFileField.addEventListener("change", () => {
+                if (imageFileField.files.length > 0) {
+                    const file = imageFileField.files[0];
+
+                    imageUrlField.value = `static/images/recipes/${file.name}`;
+
+                    const selectedFileName = document.getElementById("selectedFileName");
+                    if (selectedFileName) {
+                        selectedFileName.textContent = file.name;
+                    }
+
+                    const pickerPreviewBox = document.getElementById("pickerImagePreviewBox");
+                    if (pickerPreviewBox) {
+                        pickerPreviewBox.style.display = "none";
+                    }
+
+                    const previewBox = document.getElementById("uploadedImagePreviewBox");
+                    const previewImage = document.getElementById("uploadedImagePreview");
+
+                    if (previewBox && previewImage) {
+                        previewImage.src = URL.createObjectURL(file);
+                        previewBox.style.display = "block";
+                    }
+                }
+            });
+        }
 
         if (selectedImage || pickerCancel) {
             restoreRecipeForm("editRecipeForm");
@@ -148,6 +191,16 @@
             }
         } else {
             sessionStorage.removeItem("editRecipeForm");
+        }
+
+        if (selectedImage || pickerCancel) {
+            const imageSection = document.getElementById("image-section");
+            if (imageSection) {
+                imageSection.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
         }
     });
 </script>
