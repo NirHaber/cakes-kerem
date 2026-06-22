@@ -93,6 +93,28 @@ def get_recipe_images():
 
     return images
 
+def get_recipe_images_with_usage():
+    images = get_recipe_images()
+
+    db = get_db()
+
+    used_images = {
+        recipe.image_url
+        for recipe in db.query(Recipe).all()
+        if recipe.image_url
+    }
+
+    db.close()
+
+    result = []
+
+    for image in images:
+        result.append({
+            "url": image,
+            "is_used": image in used_images,
+        })
+
+    return result
 
 def get_db():
     db = SessionLocal()
@@ -197,8 +219,8 @@ def admin_page(
 
 @app.get("/image-picker")
 def image_picker_page(request: Request, return_to: str = "/admin"):
-    recipe_images = get_recipe_images()
-
+    recipe_images = get_recipe_images_with_usage()
+    
     return templates.TemplateResponse(
         request=request,
         name="image_picker.html",

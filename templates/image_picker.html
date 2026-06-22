@@ -29,13 +29,29 @@
 
     .image-picker-card span {
         position: absolute;
-        bottom: 0;
         right: 0;
         left: 0;
-        background: rgba(255, 247, 237, 0.9);
-        padding: 8px;
+        background: rgba(255, 247, 237, 0.92);
+        padding: 7px;
         font-size: 13px;
         text-align: center;
+    }
+
+    .image-name {
+        bottom: 0;
+    }
+
+    .image-status {
+        top: 0;
+        font-weight: 700;
+    }
+
+    .image-status.used {
+        color: #166534;
+    }
+
+    .image-status.unused {
+        color: #92400e;
     }
 
     @media (max-width: 900px) {
@@ -61,17 +77,21 @@
 
 <section class="image-picker-grid">
     {% for image in recipe_images %}
-    <a class="image-picker-card" href="{{ return_to }}?selected_image={{ image }}">
-        <img src="{{ image }}" alt="תמונה למתכון">
-        <span>{{ image.split('/')[-1] }}</span>
+    <a class="image-picker-card" href="{{ return_to }}?selected_image={{ image.url }}">
+        <img src="{{ image.url }}" alt="תמונה למתכון">
+
+        {% if image.is_used %}
+        <span class="image-status used">🟢 בשימוש</span>
+        {% else %}
+        <span class="image-status unused">🟡 לא בשימוש</span>
+        {% endif %}
+
+        <span class="image-name">{{ image.url.split('/')[-1] }}</span>
     </a>
     {% endfor %}
 </section>
 
-<div style="
-    text-align: center;
-    margin-top: 30px;
-">
+<div style="text-align: center; margin-top: 30px;">
     <a
         href="{{ return_to }}?picker_cancel=1"
         style="
