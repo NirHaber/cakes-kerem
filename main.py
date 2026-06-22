@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Query, Form
+from fastapi import FastAPI, Request, Query, Form, UploadFile, File
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -9,9 +9,9 @@ from sqlalchemy import or_
 
 import json
 import os
+import shutil
 from dotenv import load_dotenv
 from google import genai
-from google.genai import types
 from google.genai import errors
 
 
@@ -25,6 +25,56 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 load_dotenv()
 
 gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+
+def get_unique_image_filename(upload_dir: str, filename: str):
+    name, extension = os.path.splitext(
+        filename.replace(" ", "_")
+    )
+
+    candidate = f"{name}{extension}"
+    counter = 1
+
+    while os.path.exists(
+        os.path.join(upload_dir, candidate)
+    ):
+        candidate = (
+            f"{name}_{counter}{extension}"
+        )
+        counter += 1
+
+    return candidate
+
+
+def save_uploaded_image(
+    image_file: UploadFile | None
+):
+    if not image_file or not image_file.filename:
+        return ""
+
+    upload_dir = "static/images/recipes"
+    os.makedirs(upload_dir, exist_ok=True)
+
+    safe_filename = get_unique_image_filename(
+        upload_dir,
+        image_file.filename
+    )
+
+    file_path = os.path.join(
+        upload_dir,
+        safe_filename
+    )
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(
+            image_file.file,
+            buffer
+        )
+
+    return (
+        f"/static/images/recipes/"
+        f"{safe_filename}"
+    )
 
 
 def get_recipe_images():
@@ -96,6 +146,7 @@ def home(
                 )
 
     recipes = query.order_by(Recipe.id.desc()).all()
+    db.close()
 
     return templates.TemplateResponse(
         request=request,
@@ -113,6 +164,7 @@ def home(
 def recipe_page(request: Request, recipe_id: int):
     db = get_db()
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+    db.close()
 
     return templates.TemplateResponse(
         request=request,
@@ -239,9 +291,9 @@ def add_recipe(
     category: str = Form(...),
     description: str = Form(...),
     image_url: str = Form(""),
-    image_file: str = Form(""),
-    ingredients: str = Form(...),
-    instructions: str = Form(...),
+    image_file: UploadFile | None = File(None),
+    ingredients: str = Form(""),
+    instructions: str = Form(""),
     rating: float = Form(...),
     difficulty: str = Form(...),
     cost: str = Form(...),
@@ -251,7 +303,8 @@ def add_recipe(
 ):
     db = get_db()
 
-    final_image_url = image_file if image_file else image_url
+    uploaded_image_url = save_uploaded_image(image_file)
+    final_image_url = uploaded_image_url if uploaded_image_url else image_url
 
     recipe = Recipe(
         title=title,
@@ -327,9 +380,9 @@ def edit_recipe(
     category: str = Form(...),
     description: str = Form(...),
     image_url: str = Form(""),
-    image_file: str = Form(""),
-    ingredients: str = Form(...),
-    instructions: str = Form(...),
+    image_file: UploadFile | None = File(None),
+    ingredients: str = Form(""),
+    instructions: str = Form(""),
     rating: float = Form(...),
     difficulty: str = Form(...),
     cost: str = Form(...),
@@ -341,7 +394,8 @@ def edit_recipe(
 
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
-    final_image_url = image_file if image_file else image_url
+    uploaded_image_url = save_uploaded_image(image_file)
+    final_image_url = uploaded_image_url if uploaded_image_url else image_url
 
     if recipe:
         recipe.title = title

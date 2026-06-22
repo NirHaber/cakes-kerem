@@ -9,23 +9,35 @@
     </div>
 </section>
 
-<form id="adminRecipeForm" class="admin-form" method="post" action="/admin/add">
+<form id="adminRecipeForm" class="admin-form" method="post" action="/admin/add" enctype="multipart/form-data">
     <input name="title" placeholder="שם המתכון" required>
     <input name="category" placeholder="קטגוריה" required>
     <textarea name="description" placeholder="תיאור קצר" required></textarea>
     <textarea name="ingredients" placeholder="מרכיבים (כל מרכיב בשורה נפרדת)"></textarea>
     <textarea name="instructions" placeholder="שלבי הכנה (כל שלב בשורה נפרדת)"></textarea>
 
+    <div id="image-section"></div>
+
     <label>תמונה למתכון</label>
 
     <input name="image_url" value="{{ selected_image or '' }}" placeholder="קישור לתמונה חיצונית או תמונה שנבחרה">
+
+    <label class="upload-image-btn">
+        בחר קובץ מהמחשב
+        <input type="file" name="image_file" accept="image/*">
+    </label>
+
+    <div id="uploadedImagePreviewBox" class="selected-image-preview" style="display: none;">
+        <p>התמונה שנבחרה מהמחשב:</p>
+        <img id="uploadedImagePreview" src="" alt="תמונה שנבחרה מהמחשב">
+    </div>
 
     <a href="/image-picker?return_to=/admin" class="image-picker-btn" onclick="saveRecipeForm('adminRecipeForm')">
         בחר תמונה מהגלריה
     </a>
 
     {% if selected_image %}
-    <div style="
+    <div id="pickerImagePreviewBox" style="
         width: 260px;
         max-width: 260px;
         background: #fffaf5;
@@ -117,7 +129,7 @@
         const data = {};
 
         form.querySelectorAll("input, textarea, select").forEach((field) => {
-            if (field.name) {
+            if (field.name && field.type !== "file") {
                 data[field.name] = field.value;
             }
         });
@@ -137,7 +149,7 @@
 
         Object.keys(data).forEach((name) => {
             const field = form.querySelector(`[name="${name}"]`);
-            if (field) {
+            if (field && field.type !== "file") {
                 field.value = data[name];
             }
         });
@@ -147,6 +159,36 @@
         const selectedImage = "{{ selected_image or '' }}";
         const pickerCancel = "{{ picker_cancel or '' }}";
 
+        const imageFileField = document.querySelector('[name="image_file"]');
+        const imageUrlField = document.querySelector('[name="image_url"]');
+
+        if (imageFileField && imageUrlField) {
+            imageFileField.addEventListener("change", () => {
+                if (imageFileField.files.length > 0) {
+                    const file = imageFileField.files[0];
+
+                    imageUrlField.value = `static/images/recipes/${file.name}`;
+
+                    const selectedFileName = document.getElementById("selectedFileName");
+                    if (selectedFileName) {
+                        selectedFileName.textContent = file.name;
+                    }
+
+                    const pickerPreviewBox = document.getElementById("pickerImagePreviewBox");
+                    if (pickerPreviewBox) {
+                        pickerPreviewBox.style.display = "none";
+                    }
+
+                    const previewBox = document.getElementById("uploadedImagePreviewBox");
+                    const previewImage = document.getElementById("uploadedImagePreview");
+
+                    if (previewBox && previewImage) {
+                        previewImage.src = URL.createObjectURL(file);
+                        previewBox.style.display = "block";
+                    }
+                }
+            });
+        }
         if (selectedImage || pickerCancel) {
             restoreRecipeForm("adminRecipeForm");
 
@@ -159,7 +201,16 @@
         } else {
             sessionStorage.removeItem("adminRecipeForm");
         }
-    });
-</script>
+
+        if (selectedImage || pickerCancel) {
+            const imageSection = document.getElementById("image-section");
+            if (imageSection) {
+                imageSection.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
+        }
+    });</script>
 
 {% endblock %}
